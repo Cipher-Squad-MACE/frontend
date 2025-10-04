@@ -50,11 +50,14 @@ export default function MapComponent({ data = [], selectedType = '', locateCoord
       style={{ width: '80vw', height: '100vh', marginLeft: '20vw' }}
       minZoom={2}
       maxZoom={10}
-      worldCopyJump={false} // prevents infinite map duplication
+      worldCopyJump={false}
+      maxBounds={[[-90, -180], [90, 180]]}      // 🔒 restricts dragging to the world
+      maxBoundsViscosity={1.0}                  // keeps map locked in bounds
     >
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution="&copy; OpenStreetMap contributors"
+        noWrap={true}   // 🔒 prevents infinite horizontal repeat
       />
 
       {data
