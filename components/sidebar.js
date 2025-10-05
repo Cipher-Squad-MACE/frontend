@@ -3,12 +3,14 @@
 import { useState, useEffect } from "react";
 import worldData from '../countries.json'; // adjust path
 
-export default function Sidebar({ locate }) {
+export default function Sidebar({ locate, selectedType, setSelectedType }) {
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedState, setSelectedState] = useState("");
 
   const [countryList, setCountryList] = useState([]);
   const [stateList, setStateList] = useState([]);
+  const [flowerList, setFlowerList] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Load all countries on mount
   useEffect(() => {
@@ -26,6 +28,23 @@ export default function Sidebar({ locate }) {
       setSelectedState("");
     }
   }, [selectedCountry]);
+
+  // Fetch flower data from mockData.json
+  useEffect(() => {
+    fetch("/mockData.json")
+      .then((res) => res.json())
+      .then((data) => {
+        // get unique phenophase names
+        const uniqueFlowers = [...new Set(data.map(f => f.phenophase_name))];
+        setFlowerList(uniqueFlowers);
+      })
+      .catch(() => setFlowerList([]));
+  }, []);
+
+  // Filtered flowers based on search term
+  const filteredFlowers = flowerList.filter(flower =>
+    flower.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   // Go button logic
   const handleGo = () => {
@@ -90,10 +109,32 @@ export default function Sidebar({ locate }) {
 
       <hr className="my-6 border-gray-300" />
 
-      {/* Flower Section Placeholder */}
-      <h2 className="text-xl font-bold mb-2 text-gray-800">Flowers you can see</h2>
+      {/* Flower Search */}
+      <h2 className="text-xl font-bold mb-2 text-gray-800">Select a Flower / Phenophase</h2>
+      <input
+        type="text"
+        placeholder="Search flowers..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="w-full p-2 mb-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+      />
+
+      {/* Flower Radio Buttons */}
       <div className="flex flex-col gap-2">
-        <p className="text-gray-500 italic">Coming soon...</p>
+        {filteredFlowers.length === 0 && <p className="text-gray-500 italic">No flowers found</p>}
+        {filteredFlowers.map((flower, idx) => (
+          <label key={idx} className="flex items-center gap-2 text-gray-700">
+            <input
+              type="radio"
+              name="flower"
+              value={flower}
+              checked={selectedType === flower}
+              onChange={() => setSelectedType(flower)}
+              className="accent-blue-500"
+            />
+            {flower}
+          </label>
+        ))}
       </div>
     </div>
   );
