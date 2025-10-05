@@ -32,7 +32,7 @@ export default function MapComponent({ data = [], selectedType = '', locateCoord
       zoom={2}
       style={{ width: '80vw', height: '100vh', marginLeft: '20vw', backgroundColor: '#f3f4f6' }}
       minZoom={2}
-      maxZoom={10}
+      maxZoom={20}
       worldCopyJump={false}
       maxBounds={[[-90, -180], [90, 180]]}
       maxBoundsViscosity={1.0}
