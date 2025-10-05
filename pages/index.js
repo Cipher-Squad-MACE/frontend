@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import dynamic from 'next/dynamic';
-import Slider from "../components/slider";
 
 // Dynamically import MapComponent to avoid SSR issues with Leaflet
 const MapComponent = dynamic(() => import("../components/map"), { ssr: false });
@@ -52,7 +51,6 @@ export default function Home() {
         selectedType={selectedType}
         locateCoords={locateCoords}
       />
-      <Slider day={day} setDay={setDay} />
     </div>
   );
 }
