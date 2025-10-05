@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import MapComponent from "../components/map";
 import Sidebar from "../components/sidebar";
 import Slider from "../components/slider";
-import Timer from "../components/timer";
 
 export default function Home() {
   const [data, setData] = useState([]);
@@ -56,7 +55,7 @@ export default function Home() {
         locateCoords={locateCoords}
       />
       <Slider day={day} setDay={setDay} />
-      <Timer />
+      
     </div>
   );
 }
