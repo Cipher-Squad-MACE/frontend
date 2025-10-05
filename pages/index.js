@@ -6,35 +6,31 @@ import Sidebar from "../components/sidebar";
 import Slider from "../components/slider";
 
 export default function Home() {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState([]); // flower or other points
   const [selectedType, setSelectedType] = useState("");
   const [day, setDay] = useState(0);
   const [locateCoords, setLocateCoords] = useState(null);
 
-  // Load data from JSON
+  // Load data (optional flower data)
   useEffect(() => {
     fetch("/mockData.json")
       .then((res) => res.json())
-      .then((json) => setData(json));
+      .then((json) => setData(json))
+      .catch(() => setData([])); // fallback to empty
   }, []);
 
-  const flowerTypes = Array.from(new Set(data.map((f) => f.type)));
-
-  // Locate function: uses coordinates from JSON
-  const locate = (countryName) => {
-    const countryData = data.find(f => f.country === countryName);
-    if (countryData && countryData.coordinates) {
-      const coords = Array.isArray(countryData.coordinates[0])
-        ? countryData.coordinates[0]
-        : countryData.coordinates;
+  // Function passed to Sidebar to zoom map
+  const locate = (coords) => {
+    if (coords) {
       setLocateCoords(coords);
     } else {
       setLocateCoords(null);
     }
   };
 
-  // Filter data by selected day
+  // Filter data by selected day (optional)
   const filteredData = data.filter((f) => {
+    if (!f.date) return true;
     const patchDate = new Date(f.date);
     const targetDate = new Date();
     targetDate.setDate(targetDate.getDate() - day);
@@ -44,10 +40,9 @@ export default function Home() {
   return (
     <div className="h-screen w-screen relative">
       <Sidebar
-        flowerTypes={flowerTypes}
+        locate={locate}
         selectedType={selectedType}
         setSelectedType={setSelectedType}
-        locate={locate}
       />
       <MapComponent
         data={filteredData}
@@ -55,7 +50,6 @@ export default function Home() {
         locateCoords={locateCoords}
       />
       <Slider day={day} setDay={setDay} />
-      
     </div>
   );
 }
