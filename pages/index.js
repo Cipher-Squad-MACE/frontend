@@ -1,9 +1,12 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import MapComponent from "../components/map";
-import Sidebar from "../components/sidebar";
+import dynamic from 'next/dynamic';
 import Slider from "../components/slider";
+
+// Dynamically import MapComponent to avoid SSR issues with Leaflet
+const MapComponent = dynamic(() => import("../components/map"), { ssr: false });
+const Sidebar = dynamic(() => import("../components/sidebar"), { ssr: false });
 
 export default function Home() {
   const [data, setData] = useState([]); // flower or other points
