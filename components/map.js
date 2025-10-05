@@ -11,6 +11,8 @@ const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLaye
 const CircleMarker = dynamic(() => import('react-leaflet').then(mod => mod.CircleMarker), { ssr: false });
 const Polyline = dynamic(() => import('react-leaflet').then(mod => mod.Polyline), { ssr: false });
 
+import { useMap } from 'react-leaflet';
+
 // Helper: assign consistent colors per flower name
 const flowerColors = {};
 const getColor = (flower) => {
@@ -20,10 +22,24 @@ const getColor = (flower) => {
   return flowerColors[flower];
 };
 
-export default function MapComponent({ selectedType }) {
+// Fly to selected location
+function Locate({ coords, zoom = 5 }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (coords) {
+      map.flyTo(coords, zoom, { duration: 1.5 });
+    }
+  }, [coords, zoom, map]);
+
+  return null;
+}
+
+export default function MapComponent({ selectedType, locateCoords = null }) {
   const [groupedData, setGroupedData] = useState({});
 
   useEffect(() => {
+    // Group coordinates by flower/phenophase
     const grouped = {};
     mockData.forEach(item => {
       const name = item.phenophase_name;
@@ -32,28 +48,25 @@ export default function MapComponent({ selectedType }) {
     });
     setGroupedData(grouped);
   }, []);
-
-  // Get exactly 3 coordinates
+    // Get first 3 coordinates only
   const selectedCoords = selectedType && groupedData[selectedType]
     ? groupedData[selectedType].slice(0, 3)
     : [];
 
-  // Close the loop for the polygon/dotted line
-  const loopedCoords = selectedCoords.length > 1
-    ? [...selectedCoords, selectedCoords[0]] // add first point at end
+   const loopedCoords = selectedCoords.length > 1
+    ? [...selectedCoords, selectedCoords[0]]
     : selectedCoords;
-
+    
   return (
     <MapContainer
-      center={[20, 0]} // fixed center
-      zoom={2}         // fixed zoom
+      center={[20, 0]}
+      zoom={2}
       style={{ width: '80vw', height: '100vh', marginLeft: '20vw', backgroundColor: '#f3f4f6' }}
       minZoom={2}
       maxZoom={20}
       worldCopyJump={false}
       maxBounds={[[-90, -180], [90, 180]]}
       maxBoundsViscosity={1.0}
-      attributionControl={false} 
     >
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -61,8 +74,8 @@ export default function MapComponent({ selectedType }) {
         noWrap={true}
       />
 
-      {/* Render circles */}
-      {selectedCoords.map((coord, idx) => (
+      {/* Render circles for all coordinates */}
+      {selectedType && groupedData[selectedType] && groupedData[selectedType].map((coord, idx) => (
         <CircleMarker
           key={idx}
           center={coord}
@@ -75,17 +88,23 @@ export default function MapComponent({ selectedType }) {
         />
       ))}
 
-      {/* Connect all coordinates with dotted lines forming a closed loop */}
+      {/* Connect circles using polyline if more than one coordinate */}
       {loopedCoords.length > 1 && (
         <Polyline
           positions={loopedCoords}
           pathOptions={{
             color: getColor(selectedType),
             weight: 2,
-            dashArray: '5,5' // dotted
+            dashArray: '5,5' // Dotted line
           }}
         />
       )}
+
+      {locateCoords && <Locate coords={locateCoords} zoom={5} />}
     </MapContainer>
   );
 }
+
+
+
+
