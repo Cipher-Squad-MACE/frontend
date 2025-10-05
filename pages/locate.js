@@ -1,16 +1,17 @@
 'use client';
 
 import { useEffect } from "react";
-import { useMap } from 'react-leaflet';
+import { useMap } from "react-leaflet";
 
-export default function Locate({ coords, zoom = 7 }) {
+// Handles zoom and fly-to behavior
+export default function MapUpdater({ targetCoords }) {
   const map = useMap();
 
   useEffect(() => {
-    if (coords) {
-      map.flyTo(coords, zoom, { duration: 1.5 });
+    if (map && targetCoords && targetCoords.length === 2) {
+      map.flyTo(targetCoords, 6, { animate: true, duration: 2 });
     }
-  }, [coords, zoom, map]);
+  }, [map, targetCoords]);
 
   return null;
 }
